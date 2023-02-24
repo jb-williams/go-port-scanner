@@ -26,14 +26,15 @@ func main() {
 	doneChannel := make(chan bool)
 	activeThreadCount := 0
 	log.Println("Scanning Host: " + *host2Scan)
+	if *singlePort != 0 {
+		startPort = singlePort
+		endPort = singlePort
+	}
 
 	switch {
 	case *tcpScan != false && *udpScan != true && *host2Scan != "":
 		netWork := "tcp"
-		if *singlePort != 0 {
-			startPort = singlePort
-			endPort = singlePort
-		}
+		// for portNum := 1; portNum <= 65535; portNum++ {
 		for portNum := *startPort; portNum <= *endPort; portNum++ {
 			activeThreadCount++
 			go scanningTCP(netWork, *host2Scan, portNum, doneChannel, *outFile)
@@ -49,10 +50,7 @@ func main() {
 
 	case *udpScan != false && *tcpScan != true && *host2Scan != "":
 		netWork := "udp"
-		if *singlePort != 0 {
-			startPort = singlePort
-			endPort = singlePort
-		}
+		// for portNum := 1; portNum <= 65535; portNum++ {
 		for portNum := *startPort; portNum <= *endPort; portNum++ {
 			activeThreadCount++
 			go scanningUDP(netWork, *host2Scan, portNum, doneChannel, *outFile)
@@ -85,18 +83,18 @@ func scanningTCP(netWork string, tcpScan string, port int, doneChannel chan bool
 	conn.Close()
 	checkConn := "[+] " + strconv.Itoa(port) + " connected"
 	// TRY TO DO NEW BUFFER TO WRITE TO FILE
-	if outFile != "" {
-		outfile, err := os.Create(outFile)
-		if err != nil {
-			lPf("ERROR: Failed to create %s", outfile)
-		}
-		defer outfile.Close()
-		err = ioutil.WriteFile(outFile, []byte(checkConn), 0644)
-		if err != nil {
-			lPf("ERROR: Failed to write to %s", outfile)
-		}
-	}
-	lPf("[+] %d connnected", port)
+	// if outFile != "" {
+	// 	outfile, err := os.Create(outFile)
+	// 	if err != nil {
+	// 		lPf("ERROR: Failed to create %s", outfile)
+	// 	}
+	// 	defer outfile.Close()
+	// 	err = ioutil.WriteFile(outFile, []byte(checkConn), 0644)
+	// 	if err != nil {
+	// 		lPf("ERROR: Failed to write to %s", outfile)
+	// 	}
+	// }
+	// lPf("[+] %d connnected", port)
 	lPf(string(checkConn[:]))
 	doneChannel <- true
 }
