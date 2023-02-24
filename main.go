@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -16,17 +17,19 @@ func main() {
 	tcpScan := flag.Bool("t", false, "TCP Scan")
 	udpScan := flag.Bool("u", false, "UDP Scan")
 	host2Scan := flag.String("a", "", "REQUIRED: Host to Scan/Attack")
+	outFile := flag.String("o", "", "Output to a file")
+	flag.Parse()
 
 	doneChannel := make(chan bool)
 	activeThreadCount := 0
 	log.Println("Scanning Host: " + *host2Scan)
 
 	switch {
-	case *tcpScan && !*udpScan && *host2Scan != "":
+	case *tcpScan != false && *udpScan != true && *host2Scan != "":
 		netWork := "tcp"
 		for portNum := 1; portNum <= 65535; portNum++ {
 			activeThreadCount++
-			go scanningTCP(netWork, *host2Scan, portNum, doneChannel)
+			go scanningTCP(netWork, *host2Scan, portNum, doneChannel, *outFile)
 		}
 
 		for {
@@ -37,11 +40,11 @@ func main() {
 			}
 		}
 
-	case *udpScan && *host2Scan != "":
+	case *udpScan != false && *tcpScan != true && *host2Scan != "":
 		netWork := "udp"
 		for portNum := 1; portNum <= 65535; portNum++ {
 			activeThreadCount++
-			go scanningTCP(netWork, *host2Scan, portNum, doneChannel)
+			go scanningUDP(netWork, *host2Scan, portNum, doneChannel, *outFile)
 		}
 
 		for {
@@ -61,28 +64,52 @@ func main() {
 	}
 }
 
-func scanningTCP(netWork string, host2Scan string, port int, doneChannel chan bool) {
+func scanningTCP(netWork string, tcpScan string, port int, doneChannel chan bool, outFile string) {
 	timeoutLength := 5 * time.Second
-	conn, err := net.DialTimeout(netWork, host2Scan+":"+strconv.Itoa(port), timeoutLength)
-	//conn, err := net.DialTimeout("tcp", host + ":" + strconv.Itoa(port), timeoutLength)
+	conn, err := net.DialTimeout(netWork, tcpScan+":"+strconv.Itoa(port), timeoutLength)
 	if err != nil {
 		doneChannel <- false
 		return // could not connect
 	}
 	conn.Close()
+	checkConn := "[+] " + strconv.Itoa(port) + " connected"
+	// TRY TO DO NEW BUFFER TO WRITE TO FILE
+	if outFile != "" {
+		outfile, err := os.Create(outFile)
+		if err != nil {
+			lPf("ERROR: Failed to create %s", outfile)
+		}
+		defer outfile.Close()
+		err = ioutil.WriteFile(outFile, []byte(checkConn), 0644)
+		if err != nil {
+			lPf("ERROR: Failed to write to %s", outfile)
+		}
+	}
 	lPf("[+] %d connnected", port)
+	lPf(string(checkConn[:]))
 	doneChannel <- true
 }
 
-func scanningUDP(netWork string, host2Scan string, port int, doneChannel chan bool) {
+func scanningUDP(netWork string, host2Scan string, port int, doneChannel chan bool, outFile string) {
 	timeoutLength := 5 * time.Second
 	conn, err := net.DialTimeout(netWork, host2Scan+":"+strconv.Itoa(port), timeoutLength)
-	//conn, err := net.DialTimeout("tcp", host + ":" + strconv.Itoa(port), timeoutLength)
 	if err != nil {
 		doneChannel <- false
 		return // could not connect
 	}
 	conn.Close()
-	lPf("[+] %d connnected", port)
+	checkConn := "[+] " + strconv.Itoa(port) + " connected"
+	if outFile != "" {
+		outfile, err := os.Create(outFile)
+		if err != nil {
+			lPf("ERROR: Failed to create %s", outfile)
+		}
+		defer outfile.Close()
+		err = ioutil.WriteFile(outFile, []byte(checkConn), 0644)
+		if err != nil {
+			lPf("ERROR: Failed to write to %s", outfile)
+		}
+	}
+	lPf(string(checkConn[:]))
 	doneChannel <- true
 }
