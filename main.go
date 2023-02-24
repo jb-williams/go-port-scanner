@@ -17,6 +17,9 @@ func main() {
 	tcpScan := flag.Bool("t", false, "TCP Scan")
 	udpScan := flag.Bool("u", false, "UDP Scan")
 	host2Scan := flag.String("a", "", "REQUIRED: Host to Scan/Attack")
+	singlePort := flag.Int("p", 0, "Specify a Single Port")
+	startPort := flag.Int("start", 1, "Specify Starting Port")
+	endPort := flag.Int("end", 65535, "Specify Ending Port")
 	outFile := flag.String("o", "", "Output to a file")
 	flag.Parse()
 
@@ -27,7 +30,11 @@ func main() {
 	switch {
 	case *tcpScan != false && *udpScan != true && *host2Scan != "":
 		netWork := "tcp"
-		for portNum := 1; portNum <= 65535; portNum++ {
+		if *singlePort != 0 {
+			startPort = singlePort
+			endPort = singlePort
+		}
+		for portNum := *startPort; portNum <= *endPort; portNum++ {
 			activeThreadCount++
 			go scanningTCP(netWork, *host2Scan, portNum, doneChannel, *outFile)
 		}
@@ -42,7 +49,11 @@ func main() {
 
 	case *udpScan != false && *tcpScan != true && *host2Scan != "":
 		netWork := "udp"
-		for portNum := 1; portNum <= 65535; portNum++ {
+		if *singlePort != 0 {
+			startPort = singlePort
+			endPort = singlePort
+		}
+		for portNum := *startPort; portNum <= *endPort; portNum++ {
 			activeThreadCount++
 			go scanningUDP(netWork, *host2Scan, portNum, doneChannel, *outFile)
 		}
