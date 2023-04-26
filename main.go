@@ -91,14 +91,6 @@ func scanningTCP(netWork string, tcpScan string, port int, doneChannel chan bool
 	conn.Close()
 	checkConn := "[+] " + strconv.Itoa(port) + " connected"
 	// TRY TO DO NEW BUFFER TO WRITE TO FILE
-<<<<<<< HEAD
-	// 	err = ioutil.WriteFile(outFile, []byte(checkConn), 0644)
-	// 	if err != nil {
-	// 		lPf("ERROR: Failed to write to %s", outfile)
-	// 	}
-	// }
-	// lPf("[+] %d connnected", port)
-=======
 	//if outFile != "" {
 	//	outfile, err := os.Create(outFile)
 	//	if err != nil {
@@ -111,16 +103,12 @@ func scanningTCP(netWork string, tcpScan string, port int, doneChannel chan bool
 	//	}
 	//}
 	//lPf("[+] %d connnected", port)
->>>>>>> 52ec809 (messing with fileouput)
 	lPf(string(checkConn[:]))
 	doneChannel <- true
 }
 
-<<<<<<< HEAD
 func scanningUDP(netWork string, host2Scan string, port int, doneChannel chan bool) {
-=======
-func scanningUDP(netWork string, host2Scan string, port int, doneChannel chan bool, outFile string) {
->>>>>>> 52ec809 (messing with fileouput)
+	//func scanningUDP(netWork string, host2Scan string, port int, doneChannel chan bool, outFile string) {
 	timeoutLength := 5 * time.Second
 	conn, err := net.DialTimeout(netWork, host2Scan+":"+strconv.Itoa(port), timeoutLength)
 	if err != nil {
@@ -129,7 +117,6 @@ func scanningUDP(netWork string, host2Scan string, port int, doneChannel chan bo
 	}
 	conn.Close()
 	checkConn := "[+] " + strconv.Itoa(port) + " connected"
-<<<<<<< HEAD
 	// if outFile != "" {
 	// 	outfile, err := os.Create(outFile)
 	// 	if err != nil {
@@ -141,19 +128,6 @@ func scanningUDP(netWork string, host2Scan string, port int, doneChannel chan bo
 	// 		lPf("ERROR: Failed to write to %s", outfile)
 	// 	}
 	// }
-=======
-	//if outFile != "" {
-	//	outfile, err := os.Create(outFile)
-	//	if err != nil {
-	//		lPf("ERROR: Failed to create %s", outfile)
-	//	}
-	//	defer outfile.Close()
-	//	err = ioutil.WriteFile(outFile, []byte(checkConn), 0644)
-	//	if err != nil {
-	//		lPf("ERROR: Failed to write to %s", outfile)
-	//	}
-	//}
->>>>>>> 52ec809 (messing with fileouput)
 	lPf(string(checkConn[:]))
 	doneChannel <- true
 }
